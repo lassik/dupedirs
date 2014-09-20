@@ -61,6 +61,13 @@ def getstampdirs(rootdir):
     return stamp_dirset
 
 
+def iter_sorted_dupe_dir_groups(stampdirs):
+    return sorted((tuple(sorted(dirs, key=str.lower))
+                   for dirs in stampdirs.values()
+                   if len(dirs) > 1),
+                  key=lambda dirs: tuple(map(str.lower, dirs)))
+
+
 def resolve_dupe_dirs(dirs):
     print('Directories are equal:')
     for dir in dirs:
@@ -73,9 +80,8 @@ def resolve_dupe_dirs(dirs):
 
 
 def main():
-    for dirs in getstampdirs(curdir).values():
-        if len(dirs) > 1:
-            resolve_dupe_dirs(dirs)
+    for dirs in iter_sorted_dupe_dir_groups(getstampdirs(curdir)):
+        resolve_dupe_dirs(dirs)
 
 
 def config_logging(prog, verbose):
