@@ -3,7 +3,6 @@
 from contextlib import contextmanager
 from os import curdir
 import argparse
-import fnmatch
 import hashlib
 import os
 
@@ -24,7 +23,7 @@ def current_directory(dir):
         os.chdir(olddir)
 
 
-def our_getsize(dir, file):
+def our_getsize_or_zero(dir, file):
     # Change to the file's directory and do the system call using just
     # the filename to try and avoid hitting OS pathname length limits.
     with current_directory(dir):
@@ -39,7 +38,7 @@ def getdirstamp(dir, subdirs, files):
     if subdirs:
         logger.debug('no stamp because subdirs')
         return None
-    all_files_sizes = ((file, our_getsize(dir, file))
+    all_files_sizes = ((file, our_getsize_or_zero(dir, file))
                        for file in files)
     big_files_sizes = [(file, size)
                        for (file, size) in all_files_sizes
@@ -62,10 +61,10 @@ def getstampdirs(rootdir):
     return stamp_dirset
 
 
-def resolve(dirs):
-    print("Directories are equal:")
+def resolve_dupe_dirs(dirs):
+    print('Directories are equal:')
     for dir in dirs:
-        line = "  {}".format(dir)
+        line = '  {}'.format(dir)
         try:
             print(line)
         except UnicodeEncodeError:
@@ -74,9 +73,9 @@ def resolve(dirs):
 
 
 def main():
-    for stamp, dirs in getstampdirs(curdir).items():
+    for dirs in getstampdirs(curdir).values():
         if len(dirs) > 1:
-            resolve(dirs)
+            resolve_dupe_dirs(dirs)
 
 
 def config_logging(prog, verbose):
@@ -90,7 +89,8 @@ def config_logging(prog, verbose):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('-v', '--verbose', help='emit informational messages (twice for debug)', action='count', default=0)
+    ap.add_argument('-v', '--verbose', action='count', default=0,
+                    help='emit informational messages (twice for debug)')
     args = ap.parse_args()
     logger = config_logging(ap.prog, args.verbose)
     main()
