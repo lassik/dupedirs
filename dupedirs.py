@@ -51,25 +51,26 @@ def getdirstamp(dir, subdirs, files):
     return hashlib.md5(bytes(stamp_repr, 'ascii')).hexdigest()
 
 
-def getstampdirs(rootdir):
-    stamp_dirset = {}
+def get_stamps_dirs(rootdir):
+    stamps_dirs = {}
     for dir, subdirs, files in os.walk(rootdir):
         logger.debug('visiting {}'.format(dir))
         stamp = getdirstamp(dir, subdirs, files)
         if stamp:
-            stamp_dirset.setdefault(stamp, set()).add(dir)
-    return stamp_dirset
+            stamps_dirs.setdefault(stamp, set()).add(dir)
+    return stamps_dirs
 
 
-def sorted_groups_of_dupe_dirs(stampdirs):
-    return sorted((tuple(sorted(dirs, key=str.lower))
-                   for dirs in stampdirs.values()
-                   if len(dirs) > 1),
-                  key=lambda dirs: tuple(map(str.lower, dirs)))
+def get_sorted_groups_of_dupe_dirs(stamps_dirs):
+    return tuple(sorted(
+        (tuple(sorted(dirs, key=str.lower))
+         for dirs in stamps_dirs.values()
+         if len(dirs) > 1),
+        key=lambda dirs: tuple(map(str.lower, dirs))))
 
 
 def resolve_dupe_dirs(dirs):
-    print('Directories are equal:')
+    print('Duplicate directories:')
     for dir in dirs:
         line = '  {}'.format(dir)
         try:
@@ -80,8 +81,11 @@ def resolve_dupe_dirs(dirs):
 
 
 def main():
-    for dirs in sorted_groups_of_dupe_dirs(getstampdirs(curdir)):
+    dirss = get_sorted_groups_of_dupe_dirs(get_stamps_dirs(curdir))
+    for dirs in dirss:
         resolve_dupe_dirs(dirs)
+    if not dirss:
+        logger.info('No duplicate directories found')
 
 
 def config_logging(prog, verbose):
