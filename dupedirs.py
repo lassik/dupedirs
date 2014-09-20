@@ -89,12 +89,10 @@ def main():
 
 
 def config_logging(prog, verbose):
-    import logging
-    levels = (logging.WARNING, logging.INFO, logging.DEBUG)
-    logging.basicConfig(
-        level=levels[min((verbose or 0), len(levels)-1)],
-        format='%(name)s: %(levelname)s: %(message)s')
-    return logging.getLogger(prog)
+    from logging import getLogger, basicConfig, WARNING, INFO, DEBUG
+    basicConfig(level=(WARNING, INFO, DEBUG)[max(0, min(2, (verbose or 0)))],
+                format='%(name)s: %(levelname)s: %(message)s')
+    return getLogger(prog)
 
 
 if __name__ == '__main__':
