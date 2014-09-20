@@ -61,7 +61,7 @@ def getstampdirs(rootdir):
     return stamp_dirset
 
 
-def iter_sorted_dupe_dir_groups(stampdirs):
+def sorted_groups_of_dupe_dirs(stampdirs):
     return sorted((tuple(sorted(dirs, key=str.lower))
                    for dirs in stampdirs.values()
                    if len(dirs) > 1),
@@ -80,7 +80,7 @@ def resolve_dupe_dirs(dirs):
 
 
 def main():
-    for dirs in iter_sorted_dupe_dir_groups(getstampdirs(curdir)):
+    for dirs in sorted_groups_of_dupe_dirs(getstampdirs(curdir)):
         resolve_dupe_dirs(dirs)
 
 
